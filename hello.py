@@ -1,5 +1,6 @@
 '''Hello World
 
+Make Cozmo say 'Hello' in this simple Cozmo SDK example program.
 '''
 
 import sys
