@@ -20,6 +20,30 @@ def run(sdk_conn):
     loop(robot)
 
 def loop(robot):
+    cubes = None
+    print("doing")
+    #look_around = robot.start_behavior(cozmo.behavior.BehaviorTypes.LookAroundInPlace)
+    cubes = robot.world.wait_until_observe_num_objects(num=1, object_type=cozmo.objects.LightCube, timeout=60)
+    cubes[0].set_lights(cozmo.lights.green_light)
+    #look_around.stop()
+
+    print("waiting for a tap")
+    waiting_for_a_tap = True
+    while waiting_for_a_tap:
+        try:
+            robot.world.wait_for(cozmo.objects.EvtObjectTapped)
+            cubes[0].set_lights(cozmo.lights.red_light)
+            waiting_for_a_tap = False
+            continue
+        except error as e:
+            print("waiting for a tap error: %s" % e)
+            #sys.exit("A connection error occurred: %s" % e)
+
+
+
+
+    print("TAP")
+
     face_to_follow = None
     '''The main loop'''
     do_the_loopy = True
