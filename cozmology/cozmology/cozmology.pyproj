@@ -29,7 +29,6 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="behave.py" />
     <Compile Include="cozmology.py" />
   </ItemGroup>
   <ItemGroup>

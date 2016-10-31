@@ -39,7 +39,7 @@ def run(sdk_conn):
 
 def tryForThreeCubes(ctx):
     cubes = []
-    timout_in = 5
+    timout_in = 1
     #look_around = None
     ctx.robot.set_head_angle(degrees(ctx.head_degrees)).wait_for_completed()
     print("looking for some cubes ...")
@@ -87,7 +87,7 @@ def waitForACubetap(ctx):
     #which block was tapped?
     #the_chosen_block = cubes.tapped_one
     print("TAPPED")
-    ctx.head_degrees = 45.0
+    ctx.head_degrees = 30.0
     ctx.robot.set_head_angle(degrees(ctx.head_degrees)).wait_for_completed()
 
 def useThisFace(face_to_follow):
@@ -134,7 +134,8 @@ def faceYouIteration(ctx):
                 #print("face_to_follow=" + str(face_to_follow))
                 theY = useThisFace(face_to_follow)
                 ctx.robot.turn_towards_face(face_to_follow).wait_for_completed()
-                #robot.say_text("Dan!").wait_for_completed()
+                print("Daniel!")
+                #ctx.robot.say_text("Daniel!")
         except asyncio.TimeoutError:
             print("Didn't find a face!")
             ctx.robot.say_text("Where everybody go?", voice_pitch = 1.0, duration_scalar=0.7).wait_for_completed()
