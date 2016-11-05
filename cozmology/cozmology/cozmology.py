@@ -15,6 +15,7 @@ import time
 class Contextable(object):
     head_degrees = 0
     robot = None
+    face_to_follow = None
     # The class "constructor" - It's actually an initializer
     def __init__(self, head_degrees):
         self.head_degrees = head_degrees
@@ -29,11 +30,13 @@ def make_contextable(head_degrees):
 
 def run(sdk_conn):
     '''init'''
+    
     robot = sdk_conn.wait_for_robot()
     ctx = make_contextable(80.0)
     ctx.setRobot(robot)
     ctx.robot.move_lift(-3)
     ctx.robot.set_head_angle(degrees(ctx.head_degrees)).wait_for_completed()
+    ctx.face_to_follow = None
     waitForACubetap(ctx)
     loop(ctx)
 
@@ -62,7 +65,7 @@ def waitForACubetap(ctx):
         cubes = tryForThreeCubes(ctx)
         if(cubes == []):
             print("looking around")
-            look_around = ctx.robot.start_behavior(cozmo.behavior.BehaviorTypes.LookAroundInPlace)
+            #look_around = ctx.robot.start_behavior(cozmo.behavior.BehaviorTypes.LookAroundInPlace)
     if(look_around != None):
         look_around.stop()
 
@@ -104,16 +107,15 @@ def useThisFace(face_to_follow):
 def faceYouIteration(ctx):
     do_the_loopy = True
     ctx.head_degrees = 45.0
-    face_to_follow = None
     turn_action = None
-    if face_to_follow:
+    if ctx.face_to_follow:
         # start turning towards the face
-        if(face_to_follow.is_visible):
-            theY = useThisFace(face_to_follow)
+        if(ctx.face_to_follow.is_visible):
+            theY = useThisFace(ctx.face_to_follow)
             #robot.set_head_angle(degrees(45.0)).wait_for_completed()
-            print("look down ...")
+            print("you are still there, you")
             if(theY < 120.0):
-                print("theY ..." + theY)
+                print("theY ..." + str(theY))
                 ctx.head_degrees = ctx.head_degrees + 5
                 if(ctx.head_degrees > 45):
                     ctx.head_degrees = 45
@@ -124,18 +126,27 @@ def faceYouIteration(ctx):
                 if(ctx.head_degrees < -25):
                     ctx.head_degrees = -25
                 ctx.robot.set_head_angle(degrees(ctx.head_degrees)).wait_for_completed()
-            ctx.robot.turn_towards_face(face_to_follow).wait_for_completed()
-    if not (face_to_follow and face_to_follow.is_visible):
+            ctx.robot.turn_towards_face(ctx.face_to_follow).wait_for_completed()
+    if not (ctx.face_to_follow and ctx.face_to_follow.is_visible):
         # find a visible face, timeout if nothing found after a short while
         try:
             #("looking ...")
-            face_to_follow = ctx.robot.world.wait_for_observed_face(timeout=10)
-            if face_to_follow:
-                #print("face_to_follow=" + str(face_to_follow))
-                theY = useThisFace(face_to_follow)
-                ctx.robot.turn_towards_face(face_to_follow).wait_for_completed()
-                print("Daniel!")
-                #ctx.robot.say_text("Daniel!")
+            if ctx.face_to_follow:
+                # already found
+                ctx.face_to_follow = ctx.robot.world.wait_for_observed_face(timeout=10)
+                print("you are still there!")
+            else:
+                ctx.face_to_follow = ctx.robot.world.wait_for_observed_face(timeout=10)
+                if ctx.face_to_follow:
+                    #print("face_to_follow=" + str(ctx.face_to_follow))
+                    theY = useThisFace(ctx.face_to_follow)
+                    ctx.robot.turn_towards_face(ctx.face_to_follow).wait_for_completed()
+                    # append notations on the image
+                    # tweet a snapshot
+                    print("Daniel!")
+                    ctx.robot.say_text("Daniel!").wait_for_completed()
+                else:
+                    print("i didn't think we'd get here!")
         except asyncio.TimeoutError:
             print("Didn't find a face!")
             ctx.robot.say_text("Where everybody go?", voice_pitch = 1.0, duration_scalar=0.7).wait_for_completed()
